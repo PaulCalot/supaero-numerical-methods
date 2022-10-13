@@ -55,7 +55,7 @@ D = E/(1-v^2)*[1 v       0;
                0 0 (1-v)/2];
 
 % Boucle sur les triangles
-Elm_Mat_Cell = cell(1,Ntri);
+B_Mat_Cell = cell(1,Ntri);
 A=zeros(2*Noeuds);
 
 for K = 1:Ntri
@@ -63,7 +63,7 @@ for K = 1:Ntri
     [sk, s1v, s2v, s3v] = Tri2Surf(K,tri,X,Y,Z);
     Bp = matBp(s1v,s2v,s3v);
     Ak = (1/(4*sk))*Bp'*D*Bp;
-    Elm_Mat_Cell{K} = Ak;
+    B_Mat_Cell{K} = 0.5/sk * Bp;
     
     for i = 1:3
         for j = 1:3
@@ -93,8 +93,8 @@ G=zeros(2*Noeuds,1);
 
 % Valeur du chargement (force concentree) sur le bord
 
-gx = 10.0;
-gy = 0.0;
+gx = 0.0;
+gy = 10.0;
 
 % Boucle sur les noeuds recevant des forces concentrees             
 
@@ -170,7 +170,35 @@ view(2);
 % Boucle sur les triangles
 
 sigmaVM=zeros(1,Noeuds);
+aire=zeros(1,Noeuds);
 
+for K = 1:Ntri
+    Bk = B_Mat_Cell{K};
+    aire_K = Tri2Surf(K,tri,X,Y,Z);
+    S1 = tri(K, 1);
+    S2 = tri(K, 2);
+    S3 = tri(K, 3);
+    aire(S1) = aire(S1) + aire_K;
+    aire(S2) = aire(S2) + aire_K;
+    aire(S3) = aire(S3) + aire_K;
+
+    Ui = [Sol(2*S1-1);
+          Sol(2*S1);
+          Sol(2*S2-1);
+          Sol(2*S2);
+          Sol(2*S3-1);
+          Sol(2*S3)];
+    Sigma_i = D * Bk * Ui;
+    sxx = Sigma_i(1);
+    syy = Sigma_i(2);
+    sxy = Sigma_i(3);
+    s_vm = (sxx^2 + syy^2 + 3 * sxy^2 - sxx*syy)^(1/2);
+    sigmaVM(S1) = sigmaVM(S1) + s_vm*aire_K;
+    sigmaVM(S2) = sigmaVM(S2) + s_vm*aire_K;
+    sigmaVM(S3) = sigmaVM(S3) + s_vm*aire_K;
+end
+
+sigmaVM = sigmaVM./aire;
 % Visualisation des contraintes
 
 figure;
@@ -221,4 +249,9 @@ Bp = [y2 - y3,       0, y3 - y1,       0, y1 - y2,       0;
       x3 - x2, y2 - y3, x1 - x3, y3 - y1, x2 - x1, y1 - y2];
  
 
+end
+
+
+function Sig = Sigma(D, Bk, Uk)
+    Sig = D * Bk * Uk       
 end
