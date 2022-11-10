@@ -19,7 +19,7 @@ import getfem as gf
 
 # External call to gmsh client (a python API exists)
 # with (re-)definition of the mesh size (see .geo file)
-h = 0.1
+h = 0.05
 os.system('gmsh -2 Flag.geo -setnumber h '+str(h))
 
 m = gf.Mesh('import','gmsh','Flag.msh')
@@ -66,6 +66,7 @@ mim = gf.MeshIm(m, gf.Integ('IM_TRIANGLE(4)')) # pol. of order 4 are exactly int
 f = mfu.eval('[0., 0.]') # RHS
 h_inlet = mfu.eval('[4.*y*(1.-y), 0.]') # Dirichlet
 h_wall = mfu.eval('[0., 0.]') # Dirichlet
+
 nu = 0.001
 
 md = gf.Model('real')
@@ -78,11 +79,19 @@ md.add_initialized_fem_data('h_inlet', mfu, h_inlet)
 md.add_initialized_fem_data('h_wall', mfu, h_wall)
 md.add_initialized_data('nu', [nu])
 
+
 #%% Bricks
+md.add_linear_term(mim,'nu * Grad_u:Grad_Test_u - p.Div_Test_u')
+md.add_linear_term(mim, 'Div_u.Test_p')
+# md.add_linear_term(mim, 'p*Div_Test_u')
+md.add_linear_term(mim, '(p*Test_u).Normal - (nu * u.Normal * Test_u).Normal', RIGHT_BOUND)
 
-
-### TO DO ###
-
+# dirichlet
+md.add_source_term_brick(mim, 'u', 'f')
+md.add_Dirichlet_condition_with_simplification('u', LEFT_BOUND, 'h_inlet')
+md.add_Dirichlet_condition_with_simplification('u', HOLE_BOUND, 'h_wall') 
+md.add_Dirichlet_condition_with_simplification('u', BOTTOM_BOUND, 'h_wall') 
+md.add_Dirichlet_condition_with_simplification('u', TOP_BOUND, 'h_wall') 
 
 # md.add_nonlinear_term(mim, 'u.Grad_u.Test_u') # For incompressible Navier-Stokes
 
