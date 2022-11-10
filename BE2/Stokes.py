@@ -19,7 +19,7 @@ import getfem as gf
 
 # External call to gmsh client (a python API exists)
 # with (re-)definition of the mesh size (see .geo file)
-h = 0.05
+h = 0.1
 os.system('gmsh -2 Flag.geo -setnumber h '+str(h))
 
 m = gf.Mesh('import','gmsh','Flag.msh')
@@ -84,7 +84,8 @@ md.add_initialized_data('nu', [nu])
 md.add_linear_term(mim,'nu * Grad_u:Grad_Test_u - p.Div_Test_u')
 md.add_linear_term(mim, 'Div_u.Test_p')
 # md.add_linear_term(mim, 'p*Div_Test_u')
-md.add_linear_term(mim, '(p*Test_u).Normal - (nu * u.Normal * Test_u).Normal', RIGHT_BOUND)
+# md.add_linear_term(mim, 'p*Test_u.Normal - (nu * u.Normal * Test_u.Normal)', RIGHT_BOUND)
+md.add_linear_term(mim, 'nu * (Grad_u * Normal - u.Normal * Normal).Test_u', RIGHT_BOUND)
 
 # dirichlet
 md.add_source_term_brick(mim, 'u', 'f')
