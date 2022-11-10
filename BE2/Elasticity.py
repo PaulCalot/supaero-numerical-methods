@@ -82,8 +82,14 @@ md.add_initialized_fem_data('h', mfu, h)
 
 #%% Bricks
 
-
-### TO DO ###
+# help : https://getfem.org/python/examples.html?highlight=add_isotropic_linearized_elasticity_brick  
+md.add_isotropic_linearized_elasticity_brick(mim, 'u', 'clambda', 'cmu')
+md.add_source_term_brick(mim, 'u', 'f')
+md.add_source_term_brick(mim, 'u', 'g1', TOP_BOUND) 
+md.add_source_term_brick(mim, 'u', 'g1', BOTTOM_BOUND)
+md.add_source_term_brick(mim, 'u', 'g1', HOLE_BOUND) 
+md.add_source_term_brick(mim, 'u', 'g2', RIGHT_BOUND) 
+md.add_Dirichlet_condition_with_simplification('u', LEFT_BOUND, 'h')
 
 
 #%% Solve with the simplest way

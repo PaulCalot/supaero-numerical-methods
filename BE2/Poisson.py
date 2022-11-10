@@ -18,7 +18,7 @@ import getfem as gf
 
 # External call to gmsh client (a python API exists)
 # with (re-)definition of the mesh size (see .geo file)
-h = 0.04
+h = 0.04 # to change the default resolution of the mesh (default defined in Flag.geo file)
 os.system('gmsh -2 Flag.geo -setnumber h '+str(h))
 
 m = gf.Mesh('import','gmsh','Flag.msh')
@@ -55,19 +55,31 @@ mfu = gf.MeshFem(m,1) # The FE space is on mesh m, for a scalar field
 mfu.set_fem(gf.Fem('FEM_PK(2,2)')) # PK-Lagrange, continuous, on simplex of dim. 2, order 2
 # mfu.set_classical_fem(2) # Do = PK-Lagrange, continuous, on simplex of dim. 2, order 2
 
+# print(help(mfu)) # This object represents a finite element method defined on a whole mesh.
+
 # An exact integration associated to the mesh
 mim = gf.MeshIm(m, gf.Integ('IM_TRIANGLE(4)')) # integration pol. of order 4 is exact
+
+# print(help(mim)) # This object represents an integration method defined on a whole mesh (an 
+#  |  potentially on its boundaries).
+
+
 
 #%% Model definition
 
 # Data (may vary in x and y)
-f = mfu.eval('-1.') # RHS
+# .eval : interpolate an expression on the (lagrangian) MeshFem.
+f = mfu.eval('-1.') # RHS 
 gn = mfu.eval('0.') # Neumann
 gd_l = mfu.eval('0.') # Dirichlet
 gd_r = mfu.eval('-1.') # Dirichlet
 
 # Model, variables
 md = gf.Model('real') # Can handle complex fields
+# print(help(md)) #     Model variables store the variables and the state data and the
+#  |  description of a model. This includes the global tangent matrix, the right
+#  |  hand side and the constraints. There are two kinds of models, the `real`
+#  |  and the `complex` models.
 md.add_fem_variable('u', mfu) # Name the variable to compute
 
 # Data initialization
@@ -79,10 +91,12 @@ md.add_initialized_fem_data('gd_r', mfu, gd_r)
 #%% Bricks
 
 #md.add_Laplacian_brick(mim, 'u') # Laplacian brick
-md.add_linear_term(mim, 'Grad_u:Grad_Test_u') # Laplacian variational formulation
+md.add_isotropic_linearized_elasticity_brick(mim, "Sum(sigma epsilon)ij") # Laplacian variational formulation, produit contracté
+# c'est la fonction a je pense
 
-md.add_source_term_brick(mim, 'u', 'f')
-md.add_source_term_brick(mim, 'u', 'gn', BOTTOM_BOUND)
+md.add_source_term_brick(mim, 'u', 'f') # RHS terms in the variational formulation ?
+md.add_source_term_brick(mim, 'u', 'gn', BOTTOM_BOUND) # on ajoute les termes sources uniquement sur les bords 
+                                                       # (i.e. à quoi doit être égal u sur ces domaines, ici 1D)
 md.add_source_term_brick(mim, 'u', 'gn', TOP_BOUND)
 md.add_source_term_brick(mim, 'u', 'gn', HOLE_BOUND)
 
