@@ -91,7 +91,7 @@ md.add_initialized_fem_data('gd_r', mfu, gd_r)
 #%% Bricks
 
 #md.add_Laplacian_brick(mim, 'u') # Laplacian brick
-md.add_isotropic_linearized_elasticity_brick(mim, "Sum(sigma epsilon)ij") # Laplacian variational formulation, produit contracté
+md.add_linear_term(mim, 'Grad_u:Grad_Test_u') # Laplacian variational formulation, produit contracté
 # c'est la fonction a je pense
 
 md.add_source_term_brick(mim, 'u', 'f') # RHS terms in the variational formulation ?
