@@ -1,0 +1,13 @@
+name: sxs
+channels:
+- conda-forge
+dependencies:
+- python=3.9
+- getfem
+- matplotlib
+- numpy
+- petsc
+- petsc4py
+- spyder
+- slepc
+- slepc4py
