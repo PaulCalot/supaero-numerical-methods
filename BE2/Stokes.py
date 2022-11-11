@@ -83,9 +83,10 @@ md.add_initialized_data('nu', [nu])
 #%% Bricks
 md.add_linear_term(mim,'nu * Grad_u:Grad_Test_u - p.Div_Test_u')
 md.add_linear_term(mim, 'Div_u.Test_p')
-# md.add_linear_term(mim, 'p*Div_Test_u')
-# md.add_linear_term(mim, 'p*Test_u.Normal - (nu * u.Normal * Test_u.Normal)', RIGHT_BOUND)
 md.add_linear_term(mim, 'nu * (Grad_u * Normal - u.Normal * Normal).Test_u', RIGHT_BOUND)
+# The following term could (should ?) work, however the pressures becomes very high
+# like it was not setting correctly the constant ?
+# md.add_linear_term(mim, 'p*Test_u.Normal - (nu * u.Normal * Test_u.Normal)', RIGHT_BOUND)
 
 # dirichlet
 md.add_source_term_brick(mim, 'u', 'f')
