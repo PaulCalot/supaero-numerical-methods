@@ -78,21 +78,34 @@ def run(epsilon=0.0001, Gamma = 20., h = 0.1):
     md.add_initialized_fem_data('h_wall', mfu, h_wall)
     md.add_initialized_data('nu', [nu])
 
-
-    #  Bricks
     md.add_linear_term(mim,'nu * Grad_u:Grad_Test_u - p.Div_Test_u')
     md.add_linear_term(mim, 'Div_u.Test_p')
-    md.add_linear_term(mim, 'nu * (Grad_u * Normal - u.Normal * Normal).Test_u', RIGHT_BOUND)
+    md.add_linear_term(mim, 'nu * (Grad_u.Normal - u.Normal * Normal).Test_u', RIGHT_BOUND)
     # The following term could (should ?) work, however the pressures becomes very high
     # like it was not setting correctly the constant ?
     # md.add_linear_term(mim, 'p*Test_u.Normal - (nu * u.Normal * Test_u.Normal)', RIGHT_BOUND)
+    md.add_source_term_brick(mim, 'u', 'f')
 
     # dirichlet
-    md.add_source_term_brick(mim, 'u', 'f')
     md.add_Dirichlet_condition_with_simplification('u', LEFT_BOUND, 'h_inlet')
     md.add_Dirichlet_condition_with_simplification('u', HOLE_BOUND, 'h_wall') 
     md.add_Dirichlet_condition_with_simplification('u', BOTTOM_BOUND, 'h_wall') 
     md.add_Dirichlet_condition_with_simplification('u', TOP_BOUND, 'h_wall') 
+
+    #  Bricks
+    # md.add_linear_term(mim,'nu * Grad_u:Grad_Test_u - p.Div_Test_u')
+    # md.add_linear_term(mim, 'Div_u.Test_p')
+    # md.add_linear_term(mim, 'nu * (Grad_u * Normal - u.Normal * Normal).Test_u', RIGHT_BOUND)
+    # # The following term could (should ?) work, however the pressures becomes very high
+    # # like it was not setting correctly the constant ?
+    # # md.add_linear_term(mim, 'p*Test_u.Normal - (nu * u.Normal * Test_u.Normal)', RIGHT_BOUND)
+
+    # # dirichlet
+    # md.add_source_term_brick(mim, 'u', 'f')
+    # md.add_Dirichlet_condition_with_simplification('u', LEFT_BOUND, 'h_inlet')
+    # md.add_Dirichlet_condition_with_simplification('u', HOLE_BOUND, 'h_wall') 
+    # md.add_Dirichlet_condition_with_simplification('u', BOTTOM_BOUND, 'h_wall') 
+    # md.add_Dirichlet_condition_with_simplification('u', TOP_BOUND, 'h_wall') 
 
     # md.add_nonlinear_term(mim, 'u.Grad_u.Test_u') # For incompressible Navier-Stokes
 
