@@ -25,13 +25,14 @@ mu_diel  = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %PARAMETRES DE SIMULATION
 %%%%%%%%%%%%%%%%%%%%%%%%%
-fich_mesh = 'cavity_pas0075.mat';
+fich_mesh = 'cavity_pas03.mat';
 %fich_mesh = 'cavite_ptsource_pas01.mat';
-ordre   = 1;          %ordre de l'approximation polynomiale
-Tf      = 2E-9;          %Temps de simulation
+ordre   = 3;          %ordre de l'approximation polynomiale
+Tf      = 1E-9;          %Temps de simulation
 isource = 0;        %=0 si source modale et =1 si source ponctelle
-penE    = 1/(2*Z0)*1;  %pénalisation pour l'éqution en E
-penH    = 1/(2*Y0)*1;  %pénalisation pour l'éqution en H
+penE    = 0*1/(2*Z0)*1;  %pénalisation pour l'éqution en E
+penH    = 0*1/(2*Y0)*1;  %pénalisation pour l'éqution en H
+
 CL_SM   = 0;          %Parametre pour prendre en compte (=1) ou pas (=0) une condition aux limites de Silver-Muller sur le bord extérieur
 nref    = [1/sqrt(2) -1 0;1/sqrt(2) 0 -1];%Normales unitaires sortantes sur le triangle de référence
 
@@ -127,7 +128,7 @@ IMELEM_H = MELEM_H\diag(ones(N,1));
 %Matrice de masse E et son inverse sur le triangle de reference
 MELEM_E  = MASSE_ELEM_V(A,ordre,Nq,xq,yq,wq);
 IMELEM_E = MELEM_E\diag(ones(2*N,1));
-%Racine carrée des matrices de masse élemenataires pour le calcul de la CFL
+%Racine carrée des matrices de masse élementaires pour le calcul de la CFL
 SQRT_IMELEM_H = IMELEM_H^0.5; 
 SQRT_IMELEM_E = IMELEM_E^0.5; 
 
@@ -281,7 +282,7 @@ for i=1:3
    kkph = kkph + N^2;
  else 
  if CL_SM ==1 && Type_arete(na(1,i),na(2,i))==1
-   %Matrice de la condition de Sliver-Muller
+   %Matrice de la condition de Silver-Muller
   I_SM(kk_SM) = N*(T-1)+ii; 
   J_SM(kk_SM) = N*(T-1)+jj;
   SM(kk_SM) = -Z0*ZELEM_SM(i,:);
@@ -320,8 +321,8 @@ CFL =2/sqrt(eigs(ACFL,1))*(c0/hmin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%Parametre de discrétisation temporelle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%dt = CFL/4*hmin^2/c0
-dt = CFL/4*hmin/c0
+%dt = CFL/4*hmin^3/c0
+dt = CFL*hmin/c0
 niter = ceil(Tf/dt)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -376,7 +377,7 @@ end
 
 if flag_film == 1
 figure;
-Film(1) = visu_solution_Film_E(E0,1,A,ordre,mesh,mesh_ref,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax);
+ Film(1) = visu_solution_Film_E(E0,1,A,ordre,mesh,mesh_ref,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax);
 nf=1;
 end 
 
@@ -409,7 +410,7 @@ for n=1:niter
  
  if flag_film == 1 &&  mod(n,20) == 0 
   nf =nf +1;
-  Film(nf) = visu_solution_Film_E(E1,1,A,ordre,mesh,mesh_ref,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax);
+ Film(nf) = visu_solution_Film_E(E1,1,A,ordre,mesh,mesh_ref,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax);
  end 
  
 end 
@@ -421,3 +422,5 @@ visu_solution(E0,H0,A,ordre,mesh,mesh_ref);
 if flag_film == 1
  movie(Film);
 end
+
+var = sqrt(mesh.Nbtri*N)

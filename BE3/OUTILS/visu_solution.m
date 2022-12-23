@@ -37,14 +37,16 @@ end
 
 
 figure(1);
-%legend("Composante Ex")
 trimesh(mesh_visu.Tri',mesh_visu.coor(1,:)',mesh_visu.coor(2,:)',Exvisu);
+title('Composante E_x')
+
 figure(2);
-%legend("Composante Ey")
 trimesh(mesh_visu.Tri',mesh_visu.coor(1,:)',mesh_visu.coor(2,:)',Eyvisu);
+title('Composante E_y')
+
 figure(3);
-%legend("H")
 trimesh(mesh_visu.Tri',mesh_visu.coor(1,:)',mesh_visu.coor(2,:)',Hvisu);
+title('H')
 
 
 
