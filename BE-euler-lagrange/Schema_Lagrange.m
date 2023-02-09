@@ -15,12 +15,15 @@ kcl = 1;
 %% Nord
 for i=1:Nx
   if (cln(i,1) < 0) %% On vérifie que le flux est entrant dans le domaine 
+    fd = cln(i, 1);
+    fqdmx = cln(i, 2);
+    fqdmy = cln(i, 3);
     for k=1:kcl
-      fl(Np+k,1) = ... %% Masse de la particule numerique injectee
+      fl(Np+k,1) =     %% Masse de la particule numerique injectee
       fl(Np+k,2) = ... %% Vitesse en x de la particule numerique injectee
       fl(Np+k,3) = ... %% Vitesse en y de la particule numerique injectee
-      fl(Np+k,4) = ... %% Abscisse de la particule numerique injectee
-      fl(Np+k,5) = ... %% Ordonnee de la particule numerique injectee
+      fl(Np+k,4) = 1 %% Abscisse de la particule numerique injectee
+      fl(Np+k,5) = i %% Ordonnee de la particule numerique injectee
     end;
     Np = Np+kcl;
   end;

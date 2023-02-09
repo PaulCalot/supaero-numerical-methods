@@ -13,7 +13,7 @@ Dx = LongX/Nx;
 Dy = LongY/Ny;
 
 %% Type de schema utilise : 0 = Euler, 1 = Lagrange
-ModSchem = 1;
+ModSchem = 0;
 
 %% Initialisation
 Density = zeros(Nx,Ny);
@@ -23,7 +23,7 @@ flagr = [];
 Ugaz = ones(Nx,Ny,2);
 
 %% Valeur du temps caracteristique de trainee
-tau = 200;
+tau = 1;
 
 %% Pas de temps pour la simulation
 dt = min(tau/10,min(Dx,Dy)/5.);
@@ -36,12 +36,14 @@ CLE = zeros(Ny,3);
 CLO = zeros(Ny,3);
 
 %% A COMPLETER : Conditions aux limites
-CLS(floor(Nx/2)-2:floor(Nx/2)+2,1) = ...; %% Flux de densite en kg.m^(-1).s^(-1)
-CLS(floor(Nx/2)-2:floor(Nx/2)+2,2) = ...; %% Flux de quantite de mouvement (en x) en kg.s^(-2)
-CLS(floor(Nx/2)-2:floor(Nx/2)+2,3) = ...; %% Flux de quantite de mouvement (en y) en kg.s^(-2)
-CLO(floor(Ny/2)-2:floor(Ny/2)+2,1) = ...;
-CLO(floor(Ny/2)-2:floor(Ny/2)+2,2) = ...;
-CLO(floor(Ny/2)-2:floor(Ny/2)+2,3) = ...;
+fd = 1;
+fqdm = 1; 
+CLS(floor(Nx/2)-2:floor(Nx/2)+2,1) = fd; %% Flux de densite en kg.m^(-1).s^(-1) -> flux linéique
+CLS(floor(Nx/2)-2:floor(Nx/2)+2,2) = 0; %% Flux de quantite de mouvement (en x) en kg.s^(-2)
+CLS(floor(Nx/2)-2:floor(Nx/2)+2,3) = fqdm; %% Flux de quantite de mouvement (en y) en kg.s^(-2)
+CLO(floor(Ny/2)-2:floor(Ny/2)+2,1) = d;
+CLO(floor(Ny/2)-2:floor(Ny/2)+2,2) = fqdm;
+CLO(floor(Ny/2)-2:floor(Ny/2)+2,3) = 0;
 
 
 %% Utilisation du schema Euler Explicite en temps
