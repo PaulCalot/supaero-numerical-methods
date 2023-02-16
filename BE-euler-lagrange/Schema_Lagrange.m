@@ -39,7 +39,7 @@ for i=1:Nx
       fl(Np+k,2) = qdmx / mass; 
       fl(Np+k,3) = qdmy / mass;
       fl(Np+k,4) = (i - 1 + k/(kcl + 1)) * Dx;
-      fl(Np+k,5) = 0; %1 * Dy;
+      fl(Np+k,5) = 0;
     end;
     Np = Np+kcl;
   end;
@@ -70,7 +70,7 @@ for i=1:Ny
       fl(Np+k,1) = mass;
       fl(Np+k,2) = qdmx / mass;
       fl(Np+k,3) = qdmy / mass;
-      fl(Np+k,4) = 0; %1 * Dx;
+      fl(Np+k,4) = 0;
       fl(Np+k,5) = (i - 1 + k/(kcl + 1)) * Dy;
     end;  
     Np= Np+kcl;
@@ -86,8 +86,8 @@ for i=1:Np
   npy = max(1, min(Ny, floor(fl(i,5)/Dy)+1 ));
 
   %% Effets de trainee
-  fl(i,2) = fl(i,2) + dt * (Ug(npx, npy, 1) - fl(i, 2))/tau;
-  fl(i,3) = fl(i,3) + dt * (Ug(npx, npy, 2) - fl(i, 3))/tau;
+  fl(i,2) = fl(i,2) + dt/tau * (Ug(npx, npy, 1) - fl(i, 2));
+  fl(i,3) = fl(i,3) + dt/tau * (Ug(npx, npy, 2) - fl(i, 3));
 
   %% Transport libre
   fl(i,4) = fl(i,4) + dt * fl(i, 2); 

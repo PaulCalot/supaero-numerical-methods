@@ -33,7 +33,7 @@ end
 %% Integrations des CL Horizontales (Est et Ouest) dans les flux 
 for i=1:Ny
   %% A COMPLETER : Flux sortants pour les CL Sortantes
-  cl3(i,1) = FluxdH(Nx+1,i)/dy; %%%%%%%%%%%%%%%%%mettre max
+  cl3(i,1) = FluxdH(Nx+1,i)/dy;
   cl3(i,2:3) = FluxvH(Nx+1,i,:)/dy;
   cl4(i,1) = FluxdH(1,i)/dy;
   cl4(i,2:3) = FluxvH(1,i,:)/dy;
@@ -86,7 +86,7 @@ for j=1:Ny
   qmvt(i,j,2) = qmvt(i,j,2) - dt/dx/dy*(FluxvH(i+1,j,2)+FluxvV(i,j+1,2)-FluxvH(i,j,2)-FluxvV(i,j,2));
 
   %% A COMPLETER : Integration temporelle de la quantite de mouvement avec le terme de rappel vers le gaz
-  qmvt(i,j,:) = qmvt(i,j,:)+dt/tau*(din(i,j)*Ug(i,j,:)-din(i,j)*vin(i,j,:));
+  qmvt(i,j,:) = qmvt(i,j,:)+dt/tau*(din(i,j)*Ug(i,j,:)-qmvt(i,j,:));
 
 %% Reconstruction de la vitesse a partir de la quantite de mouvement(pour affichage)
   if (d(i,j) > 0.00000001) 

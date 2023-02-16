@@ -15,15 +15,15 @@ Dy = LongY/Ny;
 %% Type de schema utilise : 0 = Euler, 1 = Lagrange
 ModSchem = 0;
 
+%% Valeur du temps caracteristique de trainee
+tau = 1;
+
 %% Initialisation
 Density = zeros(Nx,Ny);
 Vitesse = zeros(Nx,Ny,2);
 flagr = [];
 
 Ugaz = ones(Nx,Ny,2);
-
-%% Valeur du temps caracteristique de trainee
-tau = 1;
 
 %% Pas de temps pour la simulation
 dt = min(tau/10,min(Dx,Dy)/5.);
@@ -50,16 +50,23 @@ CLO(floor(Ny/2)-2:floor(Ny/2)+2,3) = 0;
 figure(5); quiver(Ugaz(:,:,1)',Ugaz(:,:,2)');
 
 for i=1:20
- figure(1); contourf(Density'); %'
+ figure(1); contourf(Density', 10); %'
  xl1 = xlabel('npx');
  yl1 = ylabel('npy');
- figure(2); contourf(Vitesse(:,:,1)'); %'
- figure(3); contourf(Vitesse(:,:,2)'); %'
+ colorbar;
+ figure(2); contourf(Vitesse(:,:,1)', 10); %'
+ xl2 = xlabel('npx');
+ yl2 = ylabel('npy');
+ colorbar;
+ figure(3); contourf(Vitesse(:,:,2)', 10); %'
+ xl3 = xlabel('npx');
+ yl3 = ylabel('npy');
+ colorbar;
  figure(4); quiver(Vitesse(:,:,1)',Vitesse(:,:,2)');
  xl4 = xlabel('npx');
  yl4 = ylabel('npy');
  drawnow;
- Npart = size(flagr,1)
+ Npart = size(flagr,1);
  %display('Appuyez sur Entree pour continuer ...');
  %pause; 
 
@@ -79,8 +86,7 @@ end;
 
 axis([0 50 0 50]);
 grid minor
-saveas(figure(1), "mono_density_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + ".png");
-saveas(figure(4), "mono_velocity_quiver_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + ".png");
-
-%set(yl, 'Interpreter', 'latex', 'fontsize', fontsize); % 'LineWidth', linewidth);
-%set(xl, 'Interpreter', 'latex', 'fontsize', fontsize);  %'LineWidth', linewidth);
+saveas(figure(1), "results/mono_density_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + ".png");
+saveas(figure(2), "results/mono_vx_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + ".png");
+saveas(figure(3), "results/mono_vy_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + ".png");
+saveas(figure(4), "results/mono_velocity_quiver_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + ".png");

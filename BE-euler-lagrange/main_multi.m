@@ -15,10 +15,12 @@ LongY = 1.0;
 Dx = LongX/Nx;
 Dy = LongY/Ny;
 
+%% Temps caracteristique pour la trainee
+tau = 1;
 
 %% Choix du schema utilise par domaine 0 = Eulerien - 1 = Lagrangien
 %% 2 = multi-domain (pre-set values)
-ModSchem_ = 3;
+ModSchem_ = 5;
 ModSchem = zeros(3);
 if(ModSchem_ == 1)
     ModSchem(1, 1)= 1;
@@ -50,6 +52,26 @@ elseif(ModSchem_ == 3)
     ModSchem(3, 1)= 0;
     ModSchem(3, 2)= 1;
     ModSchem(3, 3)= 1;
+elseif(ModSchem_ == 4)
+    ModSchem(1, 1)= 0;
+    ModSchem(1, 2)= 0;
+    ModSchem(1, 3)= 1;
+    ModSchem(2, 1)= 0;
+    ModSchem(2, 2)= 1;
+    ModSchem(2, 3)= 1;
+    ModSchem(3, 1)= 1;
+    ModSchem(3, 2)= 1;
+    ModSchem(3, 3)= 1;
+elseif(ModSchem_ == 5)
+    ModSchem(1, 1)= 0;
+    ModSchem(1, 2)= 1;
+    ModSchem(1, 3)= 0;
+    ModSchem(2, 1)= 1;
+    ModSchem(2, 2)= 1;
+    ModSchem(2, 3)= 1;
+    ModSchem(3, 1)= 0;
+    ModSchem(3, 2)= 1;
+    ModSchem(3, 3)= 1;
 end
 
 %% Initialisation des variables Euleriennes
@@ -64,9 +86,6 @@ for i=1:3
 end;
 
 Ugaz = ones(Nx,Ny,2);
-
-%% Temps caracteristique pour la trainee
-tau = 1;
 
 %% Pas de temps pour la simulation
 dt = min(tau/10,min(Dx,Dy)/5.);
@@ -142,11 +161,18 @@ figure(5); quiver(Ugaz(:,:,1)',Ugaz(:,:,2)');
 
 %% Boucle en temps
 for i=1:20
-  figure(1); contourf(Density',[0. 0.2 0.5 0.7 1 2 3 4 5 6]); %'
+  figure(1); contourf(Density', 20); % [0. 0.1 0.2 0.3 0.4 0.5 0.6 0.7 1 1.2 1.5 2 2.5 3 3.5 4 5 6]
   xl1 = xlabel('npx');
   yl1 = ylabel('npy');
-  figure(2); contourf(Vitesse(:,:,1)'); %'
-  figure(3); contourf(Vitesse(:,:,2)'); %'
+  colorbar;
+  figure(2); contourf(Vitesse(:,:,1)', 20); %'
+  xl2 = xlabel('npx');
+  yl2 = ylabel('npy');
+  colorbar;
+  figure(3); contourf(Vitesse(:,:,2)', 20); %'
+  xl3 = xlabel('npx');
+  yl3 = ylabel('npy');
+  colorbar;
   figure(4); quiver(Vitesse(:,:,1)',Vitesse(    :,:,2)');
   xl4 = xlabel('npx');
   yl4 = ylabel('npy');
@@ -211,6 +237,8 @@ end;
 axis([0 50 0 50]);
 grid minor
 saveas(figure(1), "results/multi_density_kind:" + num2str(ModSchem_) + "_tau:" + num2str(tau) + ".png");
+saveas(figure(2), "results/multi_vx_kind:" + num2str(ModSchem_) + "_tau:" + num2str(tau) + ".png");
+saveas(figure(3), "results/multi_vy_kind:" + num2str(ModSchem_) + "_tau:" + num2str(tau) + ".png");
 saveas(figure(4), "results/multi_velocity_quiver_kind:" + num2str(ModSchem_) + "_tau:" + num2str(tau) + ".png");
 
 
