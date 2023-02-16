@@ -17,27 +17,40 @@ Dy = LongY/Ny;
 
 
 %% Choix du schema utilise par domaine 0 = Eulerien - 1 = Lagrangien
+%% 2 = multi-domain (pre-set values)
+ModSchem_ = 3;
 ModSchem = zeros(3);
-%A MODIFIER 
-% ModSchem(1, 1)= 1;
-% ModSchem(1, 2)= 0;
-% ModSchem(1, 3)= 1;
-% ModSchem(2, 1)= 0;
-% ModSchem(2, 2)= 0;
-% ModSchem(2, 3)= 0;
-% ModSchem(3, 1)= 1;
-% ModSchem(3, 2)= 0;
-% ModSchem(3, 3)= 0;
-ModSchem(1, 1)= 1;
-ModSchem(1, 2)= 1;
-ModSchem(1, 3)= 1;
-ModSchem(2, 1)= 1;
-ModSchem(2, 2)= 1;
-ModSchem(2, 3)= 1;
-ModSchem(3, 1)= 1;
-ModSchem(3, 2)= 1;
-ModSchem(3, 3)= 1;
-
+if(ModSchem_ == 1)
+    ModSchem(1, 1)= 1;
+    ModSchem(1, 2)= 1;
+    ModSchem(1, 3)= 1;
+    ModSchem(2, 1)= 1;
+    ModSchem(2, 2)= 1;
+    ModSchem(2, 3)= 1;
+    ModSchem(3, 1)= 1;
+    ModSchem(3, 2)= 1;
+    ModSchem(3, 3)= 1;
+elseif(ModSchem_ == 2)
+    ModSchem(1, 1)= 0;
+    ModSchem(1, 2)= 0;
+    ModSchem(1, 3)= 0;
+    ModSchem(2, 1)= 0;
+    ModSchem(2, 2)= 1;
+    ModSchem(2, 3)= 0;
+    ModSchem(3, 1)= 0;
+    ModSchem(3, 2)= 0;
+    ModSchem(3, 3)= 0;
+elseif(ModSchem_ == 3)
+    ModSchem(1, 1)= 0;
+    ModSchem(1, 2)= 0;
+    ModSchem(1, 3)= 0;
+    ModSchem(2, 1)= 0;
+    ModSchem(2, 2)= 1;
+    ModSchem(2, 3)= 1;
+    ModSchem(3, 1)= 0;
+    ModSchem(3, 2)= 1;
+    ModSchem(3, 3)= 1;
+end
 
 %% Initialisation des variables Euleriennes
 Density = zeros(Nx,Ny);
@@ -53,11 +66,10 @@ end;
 Ugaz = ones(Nx,Ny,2);
 
 %% Temps caracteristique pour la trainee
-tau = 200;
+tau = 1;
 
 %% Pas de temps pour la simulation
 dt = min(tau/10,min(Dx,Dy)/5.);
-
 
 %% CONDITIONS AUX LIMITES (Nord - Sud - Est - Ouest) POUR TOUT LE DOMAINE
 CLN = zeros(Nx,3);
@@ -130,20 +142,24 @@ figure(5); quiver(Ugaz(:,:,1)',Ugaz(:,:,2)');
 
 %% Boucle en temps
 for i=1:20
-  figure(1); contourf(Density'); %'
+  figure(1); contourf(Density',[0. 0.2 0.5 0.7 1 2 3 4 5 6]); %'
+  xl1 = xlabel('npx');
+  yl1 = ylabel('npy');
   figure(2); contourf(Vitesse(:,:,1)'); %'
   figure(3); contourf(Vitesse(:,:,2)'); %'
-  figure(4); quiver(Vitesse(:,:,1)',Vitesse(:,:,2)');
+  figure(4); quiver(Vitesse(:,:,1)',Vitesse(    :,:,2)');
+  xl4 = xlabel('npx');
+  yl4 = ylabel('npy');
   drawnow;
   Npart = 0;
   for k=1:3
     for l=1:3
       Npart = Npart + size(flagr{k,l},1);
     end;
-  end;Solving via an Eulerian method
+  end;
   Npart
-  display('Appuyez sur Entree pour continuer ...');
-  pause; 
+  %display('Appuyez sur Entree pour continuer ...');
+  %pause; 
 
   for j=1:50
 
@@ -173,24 +189,28 @@ for i=1:20
     %% Redistribution des Conditions Limites (ce qui sort d'un domaine rentrera dans le domaine voisin)
     %% Est -> Ouest
     if (k<3)
-     clio{k+1,l} = clio{k, l};
-    end;
+     clio{k+1,l} = cl31; % clio{k, l};
+    end
     %% Ouest -> Est
     if (k>1) 
-      clie{k-1,l} = clie{k, l};
+      clie{k-1,l} = cl41; % clie{k, l};
     end;
     %% Nord -> Sud
     if (l<3)
-      clis{k,l+1} = clis{k, l};
+      clis{k,l+1} = cl11; % clis{k, l};
     end;
     %% Sud -> Nord
     if (l>1) 
-      clin{k,l-1} = clin{k, l};
+      clin{k,l-1} = cl21; %clin{k, l};
     end;
     end;
     end;
 
   end;
 end;
+axis([0 50 0 50]);
+grid minor
+saveas(figure(1), "results/multi_density_kind:" + num2str(ModSchem_) + "_tau:" + num2str(tau) + ".png");
+saveas(figure(4), "results/multi_velocity_quiver_kind:" + num2str(ModSchem_) + "_tau:" + num2str(tau) + ".png");
 
 

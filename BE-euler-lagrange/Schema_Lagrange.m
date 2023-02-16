@@ -8,7 +8,7 @@ Np = size(fin,1);
 fl = fin;
 
 %% Nombre de particules numeriques injectees par face du maillage pour representer les CL
-kcl = 10;
+kcl = 1;
 
 %% I - On introduit les nouvelles particules venant des CL
 %% A COMPLETER 
@@ -22,8 +22,8 @@ for i=1:Nx
       fl(Np+k,1) = mass;    %% Masse de la particule numerique injectee
       fl(Np+k,2) = qdmx / mass; %% Vitesse en x de la particule numerique injectee
       fl(Np+k,3) = qdmy / mass; %% Vitesse en y de la particule numerique injectee
-      fl(Np+k,4) = (i + k/(kcl + 1)) * Dx; %% Abscisse de la particule numerique injectee
-      fl(Np+k,5) = (Ny + 1) * Dy; %% Ordonnee de la particule numerique injectee
+      fl(Np+k,4) = (i - 1 + k/(kcl + 1)) * Dx; %% Abscisse de la particule numerique injectee
+      fl(Np+k,5) = Ny * Dy; %% Ordonnee de la particule numerique injectee
     end;
     Np = Np+kcl;
   end;
@@ -38,8 +38,8 @@ for i=1:Nx
       fl(Np+k,1) = mass;
       fl(Np+k,2) = qdmx / mass; 
       fl(Np+k,3) = qdmy / mass;
-      fl(Np+k,4) = (i + k/(kcl + 1)) * Dx;
-      fl(Np+k,5) = 1 * Dy;
+      fl(Np+k,4) = (i - 1 + k/(kcl + 1)) * Dx;
+      fl(Np+k,5) = 0; %1 * Dy;
     end;
     Np = Np+kcl;
   end;
@@ -54,8 +54,8 @@ for i=1:Ny
       fl(Np+k,1) = mass;
       fl(Np+k,2) = qdmx / mass; 
       fl(Np+k,3) = qdmy / mass;
-      fl(Np+k,4) = (Nx + 1) * Dx;
-      fl(Np+k,5) = (i + k/(kcl + 1)) * Dy;
+      fl(Np+k,4) = (Nx) * Dx;
+      fl(Np+k,5) = (i - 1 + k/(kcl + 1)) * Dy;
     end;
     Np = Np+kcl;
   end;
@@ -70,8 +70,8 @@ for i=1:Ny
       fl(Np+k,1) = mass;
       fl(Np+k,2) = qdmx / mass;
       fl(Np+k,3) = qdmy / mass;
-      fl(Np+k,4) = 1 * Dx;
-      fl(Np+k,5) = (i + k/(kcl + 1)) * Dy;
+      fl(Np+k,4) = 0; %1 * Dx;
+      fl(Np+k,5) = (i - 1 + k/(kcl + 1)) * Dy;
     end;  
     Np= Np+kcl;
   end;
@@ -122,7 +122,7 @@ for i=1:Np
         cl31(ntpy,2) = cl31(ntpy,2) + fl(i,2) * fl(i, 1) / (Dy * dt); %% Flux de quantite de mouvement (en x) en kg.s^(-2)
         cl31(ntpy,3) = cl31(ntpy,3) + fl(i,3) * fl(i, 1) / (Dy * dt); %% Flux de quantite de mouvement (en y) en kg.s^(-2)
     end
-  elseif (npx < 1)  
+  elseif (npx < 1)
     ntpy = min(Ny,max(1,npy));
     if(fl(i,2) < 0)
         cl41(ntpy,1) = cl41(ntpy,1) - fl(i,1) / (Dy * dt); 
