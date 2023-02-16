@@ -19,21 +19,21 @@ Z0   = sqrt(mu0/eps0);
 Y0   = 1/Z0;
 
 %permittivité et perméabilité relatives pour l'exemple hétérogène
-eps_diel = 1;
+eps_diel = 4;
 mu_diel  = 1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %PARAMETRES DE SIMULATION
 %%%%%%%%%%%%%%%%%%%%%%%%%
-fich_mesh = 'cavity_pas03.mat';
-%fich_mesh = 'cavite_ptsource_pas01.mat';
+%fich_mesh = 'cavity_pas01.mat';
+fich_mesh = 'cavity_diel_pas01.mat';
 ordre   = 3;          %ordre de l'approximation polynomiale
 Tf      = 1E-9;          %Temps de simulation
-isource = 0;        %=0 si source modale et =1 si source ponctelle
-penE    = 0*1/(2*Z0)*1;  %pénalisation pour l'éqution en E
-penH    = 0*1/(2*Y0)*1;  %pénalisation pour l'éqution en H
-
-CL_SM   = 0;          %Parametre pour prendre en compte (=1) ou pas (=0) une condition aux limites de Silver-Muller sur le bord extérieur
+isource = 1;        %=0 si source modale et =1 si source ponctelle
+penE    = 1/(2*Z0)*1;  %pénalisation pour l'éqution en E
+penH    = 1/(2*Y0)*1;  %pénalisation pour l'éqution en H
+% 1/2 pour upwind sur penE et penH = remove the 0
+CL_SM   = 1;          %Parametre pour prendre en compte (=1) ou pas (=0) une condition aux limites de Silver-Muller sur le bord extérieur
 nref    = [1/sqrt(2) -1 0;1/sqrt(2) 0 -1];%Normales unitaires sortantes sur le triangle de référence
 
 %Formules de quadratures
@@ -44,8 +44,8 @@ ordreq           = 2*ordre; %ordre de la quadrature sur les triangles
 %Parametres de post-traitement
 p_visu    = 1;
 mesh_ref  = creation_maillage_raffine_reference(p_visu);%redécoupage du triangle de référence
-flag_film = 0; % =0 pas d animation et =1 animation
-Xmin = 0;  Xmax = 1;
+flag_film = 1; % =0 pas d animation et =1 animation
+Xmin = 0;  Xmax = 2;
 Ymin = 0;  Ymax = 1;
 Zmin = -1; Zmax = 1;
 
@@ -57,8 +57,8 @@ if isource == 0
 mx = 1; my=1;
 else 
 %Source ponctuelle
-xs      = 0.5;
-ys      = 0.5;
+xs      = 1.0;
+ys      = 0.25;
 rs      = 0.2;
 t0      = 1E-10;
 %t0 = 5E-9/40;
@@ -322,7 +322,8 @@ CFL =2/sqrt(eigs(ACFL,1))*(c0/hmin)
 %%Parametre de discrétisation temporelle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %dt = CFL/4*hmin^3/c0
-dt = CFL*hmin/c0
+%dt = CFL*hmin/c0
+dt = 0.5 * 1/sqrt(eigs(ACFL,1)) * 0.1
 niter = ceil(Tf/dt)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -332,7 +333,7 @@ E0 = zeros(2*N*mesh.Nbtri,1); %Contiendra E_n
 E1 = zeros(2*N*mesh.Nbtri,1); %Contiendra E_(n+1)
 H0 = zeros(N*mesh.Nbtri,1); %Contiendra H_(n+1/2)
 H1 = zeros(N*mesh.Nbtri,1); %Contiendra H_(n+3/2)
-  
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%Prise en compte des conditions initiale%%%%%%%
 %%%%%%%%%%%%%et de la source%%%%%%%%%%%%%%%%%%%%%
@@ -376,7 +377,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%
 
 if flag_film == 1
-figure;
+fig = figure;
  Film(1) = visu_solution_Film_E(E0,1,A,ordre,mesh,mesh_ref,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax);
 nf=1;
 end 
@@ -408,19 +409,20 @@ for n=1:niter
  E0 = E1;
  H0 = H1;
  
- if flag_film == 1 &&  mod(n,20) == 0 
-  nf =nf +1;
- Film(nf) = visu_solution_Film_E(E1,1,A,ordre,mesh,mesh_ref,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax);
- end 
- 
-end 
-
-
-[erreurL2_E,erreurL2_H]  = erreurL2_mode(E0,H0,mx,my,c0,niter,dt,A,ordre,mesh)
-hmax
-visu_solution(E0,H0,A,ordre,mesh,mesh_ref);
-if flag_film == 1
- movie(Film);
+ if flag_film == 1 &&  mod(n,50) == 0 
+  nf = nf +1;
+  Film(nf) = visu_solution_Film_E(E1,2,A,ordre,mesh,mesh_ref,Xmin,Xmax,Ymin,Ymax,Zmin,Zmax);
+  saveas(fig, "results\q6_finer\" + "Ey_" + num2str(nf) + ".png");
+ end
 end
+
+
+%[erreurL2_E,erreurL2_H]  = erreurL2_mode(E0,H0,mx,my,c0,niter,dt,A,ordre,mesh)
+hmax
+if flag_film == 1
+ movie(Film)
+end
+
+visu_solution(E0,H0,A,ordre,mesh,mesh_ref);
 
 var = sqrt(mesh.Nbtri*N)
