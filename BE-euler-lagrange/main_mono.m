@@ -13,7 +13,7 @@ Dx = LongX/Nx;
 Dy = LongY/Ny;
 
 %% Type de schema utilise : 0 = Euler, 1 = Lagrange
-ModSchem = 0;
+ModSchem = 1;
 
 %% Initialisation
 Density = zeros(Nx,Ny);
@@ -23,7 +23,7 @@ flagr = [];
 Ugaz = ones(Nx,Ny,2);
 
 %% Valeur du temps caracteristique de trainee
-tau = 1;
+tau = 200;
 
 %% Pas de temps pour la simulation
 dt = min(tau/10,min(Dx,Dy)/5.);
@@ -41,7 +41,7 @@ fqdm = 1;
 CLS(floor(Nx/2)-2:floor(Nx/2)+2,1) = fd; %% Flux de densite en kg.m^(-1).s^(-1) -> flux linéique
 CLS(floor(Nx/2)-2:floor(Nx/2)+2,2) = 0; %% Flux de quantite de mouvement (en x) en kg.s^(-2)
 CLS(floor(Nx/2)-2:floor(Nx/2)+2,3) = fqdm; %% Flux de quantite de mouvement (en y) en kg.s^(-2)
-CLO(floor(Ny/2)-2:floor(Ny/2)+2,1) = d;
+CLO(floor(Ny/2)-2:floor(Ny/2)+2,1) = fd;
 CLO(floor(Ny/2)-2:floor(Ny/2)+2,2) = fqdm;
 CLO(floor(Ny/2)-2:floor(Ny/2)+2,3) = 0;
 
@@ -51,13 +51,17 @@ figure(5); quiver(Ugaz(:,:,1)',Ugaz(:,:,2)');
 
 for i=1:20
  figure(1); contourf(Density'); %'
+ xl1 = xlabel('npx');
+ yl1 = ylabel('npy');
  figure(2); contourf(Vitesse(:,:,1)'); %'
  figure(3); contourf(Vitesse(:,:,2)'); %'
  figure(4); quiver(Vitesse(:,:,1)',Vitesse(:,:,2)');
+ xl4 = xlabel('npx');
+ yl4 = ylabel('npy');
  drawnow;
  Npart = size(flagr,1)
- display('Appuyez sur Entree pour continuer ...');
- pause; 
+ %display('Appuyez sur Entree pour continuer ...');
+ %pause; 
 
  for j=1:50
 
@@ -73,4 +77,10 @@ for i=1:20
  end;
 end;
 
+axis([0 50 0 50]);
+grid minor
+saveas(figure(1), "mono_density_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + "_kcl:10.png");
+saveas(figure(4), "mono_velocity_quiver_kind:" + num2str(ModSchem) + "_tau:" + num2str(tau) + "_kcl:10.png");
 
+%set(yl, 'Interpreter', 'latex', 'fontsize', fontsize); % 'LineWidth', linewidth);
+%set(xl, 'Interpreter', 'latex', 'fontsize', fontsize);  %'LineWidth', linewidth);

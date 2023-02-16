@@ -8,35 +8,38 @@ Np = size(fin,1);
 fl = fin;
 
 %% Nombre de particules numeriques injectees par face du maillage pour representer les CL
-kcl = 1;
+kcl = 10;
 
 %% I - On introduit les nouvelles particules venant des CL
 %% A COMPLETER 
 %% Nord
 for i=1:Nx
   if (cln(i,1) < 0) %% On vérifie que le flux est entrant dans le domaine 
-    fd = cln(i, 1);
-    fqdmx = cln(i, 2);
-    fqdmy = cln(i, 3);
+    mass = - cln(i, 1) * Dx * dt / kcl;
+    qdmx = cln(i, 2) * Dx * dt / kcl; % on devrait avoir /kcl ici également je pense
+    qdmy = cln(i, 3) * Dx * dt / kcl;
     for k=1:kcl
-      fl(Np+k,1) =     %% Masse de la particule numerique injectee
-      fl(Np+k,2) = ... %% Vitesse en x de la particule numerique injectee
-      fl(Np+k,3) = ... %% Vitesse en y de la particule numerique injectee
-      fl(Np+k,4) = 1 %% Abscisse de la particule numerique injectee
-      fl(Np+k,5) = i %% Ordonnee de la particule numerique injectee
+      fl(Np+k,1) = mass;    %% Masse de la particule numerique injectee
+      fl(Np+k,2) = qdmx / mass; %% Vitesse en x de la particule numerique injectee
+      fl(Np+k,3) = qdmy / mass; %% Vitesse en y de la particule numerique injectee
+      fl(Np+k,4) = (i + k/(kcl + 1)) * Dx; %% Abscisse de la particule numerique injectee
+      fl(Np+k,5) = (Ny + 1) * Dy; %% Ordonnee de la particule numerique injectee
     end;
     Np = Np+kcl;
   end;
 end;
 %% Sud
 for i=1:Nx
-  if (cls(i,1) > 0) %% On vérifie que le flux est entrant dans le domaine 
+  if (cls(i,1) > 0) %% On vérifie que le flux est entrant dans le domaine
+    mass = cls(i, 1) * Dx * dt / kcl;
+    qdmx = cls(i, 2) * Dx * dt / kcl;
+    qdmy = cls(i, 3) * Dx * dt / kcl;
     for k=1:kcl 
-      fl(Np+k,1) = ...
-      fl(Np+k,2) = ... 
-      fl(Np+k,3) = ... 
-      fl(Np+k,4) = ... 
-      fl(Np+k,5) = ... 
+      fl(Np+k,1) = mass;
+      fl(Np+k,2) = qdmx / mass; 
+      fl(Np+k,3) = qdmy / mass;
+      fl(Np+k,4) = (i + k/(kcl + 1)) * Dx;
+      fl(Np+k,5) = 1 * Dy;
     end;
     Np = Np+kcl;
   end;
@@ -44,12 +47,15 @@ end;
 %% Est
 for i=1:Ny
   if (cle(i,1) < 0) %% On vérifie que le flux est entrant dans le domaine 
+    mass = - cle(i, 1) * Dy * dt / kcl;
+    qdmx = cle(i, 2) * Dy * dt / kcl;
+    qdmy = cle(i, 3) * Dy * dt / kcl;
     for k=1:kcl
-      fl(Np+k,1) = ... 
-      fl(Np+k,2) = ... 
-      fl(Np+k,3) = ... 
-      fl(Np+k,4) = ... 
-      fl(Np+k,5) = ... 
+      fl(Np+k,1) = mass;
+      fl(Np+k,2) = qdmx / mass; 
+      fl(Np+k,3) = qdmy / mass;
+      fl(Np+k,4) = (Nx + 1) * Dx;
+      fl(Np+k,5) = (i + k/(kcl + 1)) * Dy;
     end;
     Np = Np+kcl;
   end;
@@ -57,12 +63,15 @@ end;
 %% Ouest
 for i=1:Ny
   if (clo(i,1) > 0) %% On vérifie que le flux est entrant dans le domaine 
+    mass = clo(i, 1) * Dy * dt / kcl;
+    qdmx = clo(i, 2) * Dy * dt / kcl;
+    qdmy = clo(i, 3) * Dy * dt / kcl;
     for k=1:kcl
-      fl(Np+k,1) = ... 
-      fl(Np+k,2) = ... 
-      fl(Np+k,3) = ... 
-      fl(Np+k,4) = ... 
-      fl(Np+k,5) = ... 
+      fl(Np+k,1) = mass;
+      fl(Np+k,2) = qdmx / mass;
+      fl(Np+k,3) = qdmy / mass;
+      fl(Np+k,4) = 1 * Dx;
+      fl(Np+k,5) = (i + k/(kcl + 1)) * Dy;
     end;  
     Np= Np+kcl;
   end;
@@ -73,16 +82,16 @@ end;
 %% A COMPLETER
 for i=1:Np
   %% Position de la particule dans le maillage
-  npx = max(1, min(Nx, ...));
-  npy = max(1, min(Ny, ...));
+  npx = max(1, min(Nx, floor(fl(i,4)/Dx)+1 ));
+  npy = max(1, min(Ny, floor(fl(i,5)/Dy)+1 ));
 
   %% Effets de trainee
-  fl(i,2) = fl(i,2) + ...
-  fl(i,3) = fl(i,3) + ...
+  fl(i,2) = fl(i,2) + dt * (Ug(npx, npy, 1) - fl(i, 2))/tau;
+  fl(i,3) = fl(i,3) + dt * (Ug(npx, npy, 2) - fl(i, 3))/tau;
 
   %% Transport libre
-  fl(i,4) = fl(i,4) + ... 
-  fl(i,5) = fl(i,5) + ...
+  fl(i,4) = fl(i,4) + dt * fl(i, 2); 
+  fl(i,5) = fl(i,5) + dt * fl(i, 3);
 end;
 
 
@@ -108,22 +117,32 @@ for i=1:Np
   %% A COMPLETER
   if (npx > Nx)
     ntpy = min(Ny,max(1,npy));
-    cl31(ntpy,1) = cl31(ntpy,1) + ... %% Flux de densite en kg.m^(-1).s^(-1)
-    cl31(ntpy,2) = cl31(ntpy,2) + ... %% Flux de quantite de mouvement (en x) en kg.s^(-2)
-    cl31(ntpy,3) = cl31(ntpy,3) + ... %% Flux de quantite de mouvement (en y) en kg.s^(-2)
-  elseif (npx < 1)
+    if(fl(i,2) > 0) % vx > 0
+        cl31(ntpy,1) = cl31(ntpy,1) + fl(i,1) / (Dy * dt); %% Flux de densite en kg.m^(-1).s^(-1)
+        cl31(ntpy,2) = cl31(ntpy,2) + fl(i,2) * fl(i, 1) / (Dy * dt); %% Flux de quantite de mouvement (en x) en kg.s^(-2)
+        cl31(ntpy,3) = cl31(ntpy,3) + fl(i,3) * fl(i, 1) / (Dy * dt); %% Flux de quantite de mouvement (en y) en kg.s^(-2)
+    end
+  elseif (npx < 1)  
     ntpy = min(Ny,max(1,npy));
-    cl41(ntpy,1) = cl41(ntpy,1) + ... 
-    cl41(ntpy,2) = cl41(ntpy,2) + ... 
-    cl41(ntpy,3) = cl41(ntpy,3) + ... 
-  elseif (npy > Ny) 
-    cl11(npx,1) = cl11(npx,1) + ... 
-    cl11(npx,2) = cl11(npx,2) + ... 
-    cl11(npx,3) = cl11(npx,3) + ... 
+    if(fl(i,2) < 0)
+        cl41(ntpy,1) = cl41(ntpy,1) - fl(i,1) / (Dy * dt); 
+        cl41(ntpy,2) = cl41(ntpy,2) + fl(i,2) * fl(i,1) / (Dy * dt); 
+        cl41(ntpy,3) = cl41(ntpy,3) + fl(i,3) * fl(i,1) / (Dy * dt); 
+    end
+  elseif (npy > Ny)
+    ntpx = min(Nx,max(1,npx));
+    if(fl(i, 3) > 0)
+        cl11(ntpx,1) = cl11(ntpx,1) + fl(i,1) / (Dx * dt);  
+        cl11(ntpx,2) = cl11(ntpx,2) + fl(i,2) * fl(i,1) / (Dx * dt);
+        cl11(ntpx,3) = cl11(ntpx,3) + fl(i,3) * fl(i,1) / (Dx * dt); 
+    end
   elseif (npy < 1)
-    cl21(npx,1) = cl21(npx,1) + ... 
-    cl21(npx,2) = cl21(npx,2) + ... 
-    cl21(npx,3) = cl21(npx,3) + ... 
+    ntpx = min(Nx,max(1,npx));
+    if(fl(i, 3) < 0)
+        cl21(ntpx,1) = cl21(ntpx,1) - fl(i,1) / (Dx * dt);   
+        cl21(ntpx,2) = cl21(ntpx,2) + fl(i,2) * fl(i,1) / (Dx * dt);
+        cl21(ntpx,3) = cl21(ntpx,3) + fl(i,3) * fl(i,1) / (Dx * dt); 
+    end
   else %% Reconstruction densite et quantite de mouvement (pour affichage)
     d(npx,npy) = d(npx,npy)+ fl(i,1)/Dx/Dy;
     v(npx,npy,1) = v(npx,npy,1)+ fl(i,1)*fl(i,2)/Dx/Dy;

@@ -19,7 +19,25 @@ Dy = LongY/Ny;
 %% Choix du schema utilise par domaine 0 = Eulerien - 1 = Lagrangien
 ModSchem = zeros(3);
 %A MODIFIER 
-%ModSchem(?,?)= ?;
+% ModSchem(1, 1)= 1;
+% ModSchem(1, 2)= 0;
+% ModSchem(1, 3)= 1;
+% ModSchem(2, 1)= 0;
+% ModSchem(2, 2)= 0;
+% ModSchem(2, 3)= 0;
+% ModSchem(3, 1)= 1;
+% ModSchem(3, 2)= 0;
+% ModSchem(3, 3)= 0;
+ModSchem(1, 1)= 1;
+ModSchem(1, 2)= 1;
+ModSchem(1, 3)= 1;
+ModSchem(2, 1)= 1;
+ModSchem(2, 2)= 1;
+ModSchem(2, 3)= 1;
+ModSchem(3, 1)= 1;
+ModSchem(3, 2)= 1;
+ModSchem(3, 3)= 1;
+
 
 %% Initialisation des variables Euleriennes
 Density = zeros(Nx,Ny);
@@ -48,12 +66,14 @@ CLE = zeros(Ny,3);
 CLO = zeros(Ny,3);
 
 %% A COMPLETER : Conditions aux limites
-CLS(floor(Nx/2)-2:floor(Nx/2)+2,1) = ...; %% Flux de densite en kg.m^(-1).s^(-1)
-CLS(floor(Nx/2)-2:floor(Nx/2)+2,2) = ...; %% Flux de quantite de mouvement (en x) en kg.s^(-2)
-CLS(floor(Nx/2)-2:floor(Nx/2)+2,3) = ...; %% Flux de quantite de mouvement (en y) en kg.s^(-2)
-CLO(floor(Ny/2)-2:floor(Ny/2)+2,1) = ...;
-CLO(floor(Ny/2)-2:floor(Ny/2)+2,2) = ...;
-CLO(floor(Ny/2)-2:floor(Ny/2)+2,3) = ...;
+fd = 1;
+fqdm = 1; 
+CLS(floor(Nx/2)-2:floor(Nx/2)+2,1) = fd; %% Flux de densite en kg.m^(-1).s^(-1) -> flux linéique
+CLS(floor(Nx/2)-2:floor(Nx/2)+2,2) = 0; %% Flux de quantite de mouvement (en x) en kg.s^(-2)
+CLS(floor(Nx/2)-2:floor(Nx/2)+2,3) = fqdm; %% Flux de quantite de mouvement (en y) en kg.s^(-2)
+CLO(floor(Ny/2)-2:floor(Ny/2)+2,1) = fd;
+CLO(floor(Ny/2)-2:floor(Ny/2)+2,2) = fqdm;
+CLO(floor(Ny/2)-2:floor(Ny/2)+2,3) = 0;
 
 %% Utilisation du schema Euler Explicite en temps
 
@@ -120,7 +140,7 @@ for i=1:20
     for l=1:3
       Npart = Npart + size(flagr{k,l},1);
     end;
-  end;
+  end;Solving via an Eulerian method
   Npart
   display('Appuyez sur Entree pour continuer ...');
   pause; 
@@ -153,21 +173,20 @@ for i=1:20
     %% Redistribution des Conditions Limites (ce qui sort d'un domaine rentrera dans le domaine voisin)
     %% Est -> Ouest
     if (k<3)
-     clio{k+1,l} = ...;
+     clio{k+1,l} = clio{k, l};
     end;
     %% Ouest -> Est
     if (k>1) 
-     ... = ...     
+      clie{k-1,l} = clie{k, l};
     end;
     %% Nord -> Sud
     if (l<3)
-     ... = ...      
+      clis{k,l+1} = clis{k, l};
     end;
     %% Sud -> Nord
     if (l>1) 
-     ... = ... 
+      clin{k,l-1} = clin{k, l};
     end;
-
     end;
     end;
 

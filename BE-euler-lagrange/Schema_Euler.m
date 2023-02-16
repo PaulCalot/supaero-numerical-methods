@@ -33,9 +33,9 @@ end;
 %% Integrations des CL Horizontales (Est et Ouest) dans les flux 
 for i=1:Ny
   %% A COMPLETER : Flux sortants pour les CL Sortantes
-  clE3(i,1) = FluxdH(Nx+1,i)/dy; % right of the system
+  clE3(i,1) = max(0, FluxdH(Nx+1,i)/dy);
   clE3(i,2:3) = FluxvH(Nx+1,i,:)/dy;
-  clO4(i,1) = FluxdH(1,i)/dy; % left of the system
+  clO4(i,1) = min(0, FluxdH(1,i)/dy);
   clO4(i,2:3) = FluxvH(1,i,:)/dy;
 
   %% A COMPLETER : CL Entrantes pour les flux entrants
@@ -62,9 +62,9 @@ end;
 %% Integrations des CL Verticales (Nord et Sud) dans les flux
 for i=1:Nx
   %% A COMPLETER : Flux sortants pour les CL Sortantes
-  clN1(i,1) = FluxdV(i, Ny+1)/dx;
+  clN1(i,1) = max(0, FluxdV(i, Ny+1)/dx);
   clN1(i,2:3) = FluxdV(i, Ny+1)/dx;
-  clS2(i,1) = FluxdV(i, 1)/dx;
+  clS2(i,1) = min(0, FluxdV(i, 1)/dx);
   clS2(i,2:3) = FluxvV(i,1,:)/dx;
 
   %% A COMPLETER : CL Entrantes pour les flux entrants
